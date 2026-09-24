@@ -1,0 +1,94 @@
+# =============================================================================
+# docker-compose.yml — orchestration complète MiniHub (Red/Blue/Target/Front)
+# =============================================================================
+# Lance les 4 composants sur un SEUL réseau Docker interne ("sandbox-net").
+#
+# Ce qui est EXPOSÉ à l'extérieur (à ouvrir dans le pare-feu du cloud) :
+#   - front      : port 80    (le dashboard, ouvert dans le navigateur)
+#   - blue-agent : port 5001  (API alertes, appelée par le navigateur)
+#   - red-agent  : port 5002  (API décisions + déclenchement, navigateur)
+#
+# Ce qui reste INTERNE (NE JAMAIS ouvrir dans le pare-feu) :
+#   - minihub    : port 5000  = la CIBLE volontairement vulnérable.
+#                  Le red-agent l'atteint par le réseau Docker interne
+#                  (http://minihub:5000), jamais par Internet.
+#
+# Le partage du fichier access.log entre la cible (qui l'écrit) et le
+# blue-agent (qui le lit) se fait via le volume nommé "minihub-logs".
+# =============================================================================
+
+services:
+
+  # --- La cible vulnérable : INTERNE UNIQUEMENT, aucun port publié ----------
+  minihub:
+    build: ./target-env/app
+    container_name: minihub-target
+    environment:
+      MINIHUB_HOST: "0.0.0.0"     # obligatoire dans un conteneur
+      MINIHUB_PORT: "5000"
+    volumes:
+      - minihub-logs:/app/logs        # écrit access.log ici
+      - minihub-storage:/app/storage  # db.json + modèles uploadés
+    networks:
+      - sandbox-net
+    restart: unless-stopped
+    # PAS de section "ports:" -> volontairement injoignable depuis l'extérieur.
+
+  # --- Blue Team : lit access.log (volume partagé) + LLM ---------------------
+  blue-agent:
+    build: ./blue-agent
+    container_name: blue-agent
+    env_file:
+      - .env                        # LLM_BACKEND + clés API (voir .env.example)
+    environment:
+      BLUE_API_HOST: "0.0.0.0"
+      BLUE_API_PORT: "5001"
+      BLUE_BLIND_MODE: "true"
+      # On pointe la lecture vers le volume partagé de la cible :
+      TARGET_ACCESS_LOG: "/shared/target-logs/access.log"
+    volumes:
+      - minihub-logs:/shared/target-logs:ro   # lecture seule de l'access.log
+    ports:
+      - "5001:5001"
+    depends_on:
+      - minihub
+    networks:
+      - sandbox-net
+    restart: unless-stopped
+
+  # --- Red Team : attaque la cible en interne, à la demande -----------------
+  red-agent:
+    build: ./red-agent
+    container_name: red-agent
+    command: ["python", "api.py"]   # override du CMD (l'image lance agent.py)
+    env_file:
+      - .env
+    environment:
+      RED_API_HOST: "0.0.0.0"
+      RED_API_PORT: "5002"
+      TARGET_BASE_URL: "http://minihub:5000"   # nom de service = réseau interne
+    ports:
+      - "5002:5002"
+    depends_on:
+      - minihub
+    networks:
+      - sandbox-net
+    restart: unless-stopped
+
+  # --- Front : dashboard statique servi par nginx ---------------------------
+  front:
+    build: ./front
+    container_name: front
+    ports:
+      - "80:80"
+    networks:
+      - sandbox-net
+    restart: unless-stopped
+
+networks:
+  sandbox-net:
+    driver: bridge
+
+volumes:
+  minihub-logs:
+  minihub-storage:
