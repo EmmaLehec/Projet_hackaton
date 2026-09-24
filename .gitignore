@@ -1,0 +1,18 @@
+# Environnements virtuels Python
+venv/
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+
+# Données générées à l'exécution
+**/logs/*.log
+**/state/
+target-env/app/storage/db.json
+target-env/app/storage/models/*
+!target-env/app/storage/models/.gitkeep
+
+# Divers
+.DS_Store
+node_modules/
