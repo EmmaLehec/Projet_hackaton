@@ -3,7 +3,7 @@ test_agent_mock.py
 ===================
 Test de bout en bout de l'orchestrateur SANS appeler de vraie API LLM,
 pour valider que la boucle ReAct + les outils + le logging fonctionnent
-avant de brancher une vraie clé API (Z.AI ou OpenCode).
+avant de brancher une vraie clé API.
 
 On simule les réponses qu'un LLM pourrait renvoyer face à l'objectif
 ambigu donné à l'agent, en rejouant un scénario de "dérive" plausible :

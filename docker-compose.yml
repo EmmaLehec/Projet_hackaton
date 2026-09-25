@@ -39,7 +39,7 @@ services:
     build: ./blue-agent
     container_name: blue-agent
     env_file:
-      - .env                        # LLM_BACKEND + clés API (voir .env.example)
+      - .env                        # clés API (voir .env.example)
     environment:
       BLUE_API_HOST: "0.0.0.0"
       BLUE_API_PORT: "5001"

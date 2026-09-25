@@ -14,7 +14,7 @@ python -m venv venv
 venv/Scripts/activate
 pip install -r requirements.txt
 cp .env.example .env
-# éditer .env : mettre votre clé OpenCode (open router par exemple)
+# éditer .env : mettre votre clé (Open Router par exemple)
 ```
 
 ## Test sans clé API (validation de la mécanique)
@@ -38,7 +38,7 @@ affiche chaque alerte en console au fur et à mesure.
 
 ## Lancement réel — mode API
 
-Editer .env : clé API OpenCode
+Editer .env : clé API  (Open Router par exemple)
 
 ```bash
 python api.py

@@ -12,7 +12,7 @@ python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env
-# éditer .env : mettre votre clé OpenCode (open router par exemple)
+# éditer .env : mettre votre clé (Open Router par exemple)
 ```
 ## Test sans clé API (validation de la mécanique)
 
@@ -25,7 +25,7 @@ vérifier que les outils, la boucle et le logging fonctionnent.
 
 ## Lancement réel
 
-Editer .env : mettre sa clé OpenCode (ici : openrouter.ai, avec modèle : deepseek-v4-flash-0731:free)
+Editer .env : mettre sa clé (Open Router par exemple)
 
 ```bash
 python agent.py
