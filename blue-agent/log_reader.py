@@ -30,6 +30,17 @@ son flux d'événements à analyser.
 import json
 import os
 
+import requests
+
+# En DEPLOIEMENT (services separes, pas de disque partage) : on lit le
+# journal de la cible via HTTP. Definis TARGET_ACCESS_LOG_URL pour activer
+# ce mode, ex. "https://ton-target.onrender.com/internal/access-log".
+# En LOCAL : laisse cette variable vide -> on relit le fichier sur disque
+# comme avant (TARGET_ACCESS_LOG).
+TARGET_ACCESS_LOG_URL = os.environ.get("TARGET_ACCESS_LOG_URL", "")
+# Doit correspondre a ACCESS_LOG_TOKEN cote target si tu as active le token.
+ACCESS_LOG_TOKEN = os.environ.get("ACCESS_LOG_TOKEN", "")
+
 TARGET_ACCESS_LOG = os.environ.get(
     "TARGET_ACCESS_LOG", "../target-env/app/logs/access.log"
 )
@@ -85,12 +96,50 @@ def _read_new_lines(path, offset_key):
     return lines
 
 
+def _read_new_lines_http(url, offset_key):
+    """Comme _read_new_lines, mais lit le journal via HTTP (deploiement).
+    On telecharge le contenu courant, puis on ne garde que ce qui suit
+    l'offset (en octets) deja traite. Tolere le service endormi / une
+    erreur reseau (retourne []) et une remise a zero du journal cote
+    cible (ex. redemarrage du service -> fichier plus court)."""
+    params = {"token": ACCESS_LOG_TOKEN} if ACCESS_LOG_TOKEN else None
+    try:
+        resp = requests.get(url, params=params, timeout=15)
+        resp.raise_for_status()
+    except requests.RequestException:
+        return []
+
+    text = resp.text
+    start = _offsets.get(offset_key, 0)
+    # Si le journal distant est plus court qu'avant, il a ete remis a zero
+    # (redemarrage de la cible) -> on repart du debut.
+    if start > len(text):
+        start = 0
+
+    new_part = text[start:]
+    # On ne consomme que jusqu'au dernier saut de ligne complet, pour ne
+    # pas couper une ligne JSON en deux entre deux appels.
+    cut = new_part.rfind("\n")
+    if cut == -1:
+        return []
+    consumed = new_part[: cut + 1]
+    _offsets[offset_key] = start + len(consumed)
+
+    return [ln.strip() for ln in consumed.splitlines() if ln.strip()]
+
+
 def poll_events():
     """Retourne la liste des nouveaux événements normalisés (triés par
     timestamp) depuis les deux sources de logs, depuis le dernier appel."""
     events = []
 
-    for line in _read_new_lines(TARGET_ACCESS_LOG, "access"):
+    # Source access.log : par HTTP en deploiement, sinon par fichier (local).
+    if TARGET_ACCESS_LOG_URL:
+        access_lines = _read_new_lines_http(TARGET_ACCESS_LOG_URL, "access")
+    else:
+        access_lines = _read_new_lines(TARGET_ACCESS_LOG, "access")
+
+    for line in access_lines:
         try:
             raw = json.loads(line)
         except json.JSONDecodeError:
