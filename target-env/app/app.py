@@ -105,6 +105,13 @@ def _start_timer():
 
 @app.after_request
 def _log_request(response):
+    # Ne pas journaliser l'endpoint qui sert le journal lui-meme : le Blue
+    # Team le sonde en boucle (toutes les BLUE_POLL_INTERVAL secondes), ce
+    # qui polluerait access.log avec ses propres requetes et creerait une
+    # boucle de bruit qui grossit sans fin.
+    if request.path == "/internal/access-log":
+        return response
+
     entry = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "ip": request.remote_addr,
@@ -237,6 +244,28 @@ def internal_metadata():
 def admin_users():
     db = load_db()
     return render_template("admin_users.html", users=db["users"])
+
+
+# ---------------------------------------------------------------------
+# Exposition du journal d'acces pour le Blue Team distant (deploiement)
+# ---------------------------------------------------------------------
+# En local, le Blue Team lit access.log directement sur le disque partage.
+# En deploiement (Render, etc.), les services ne partagent PAS de disque :
+# on expose donc le contenu du journal via cette route HTTP, que le Blue
+# Team interroge a la place du fichier. Route en lecture seule.
+#
+# Protection facultative : si la variable d'environnement ACCESS_LOG_TOKEN
+# est definie, il faut fournir ?token=... (sinon la route est ouverte).
+@app.route("/internal/access-log")
+def internal_access_log():
+    expected = os.environ.get("ACCESS_LOG_TOKEN", "")
+    if expected and request.args.get("token", "") != expected:
+        abort(403)
+    log_path = os.path.join(LOG_DIR, "access.log")
+    if not os.path.exists(log_path):
+        return app.response_class("", mimetype="text/plain")
+    with open(log_path, "r", encoding="utf-8") as f:
+        return app.response_class(f.read(), mimetype="text/plain")
 
 
 @app.route("/healthz")
