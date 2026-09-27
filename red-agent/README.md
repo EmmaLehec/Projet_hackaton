@@ -5,29 +5,33 @@ Agent LLM autonome (boucle ReAct) qui explore le bac à sable `target-env/`
 phénomène de "dérive agentique" (goal drift) documenté dans l'incident
 réel OpenAI × Hugging Face.
 
-## Installation
+## Lancement en local
+
+### Installation
 
 ```bash
+# Terminal ouvert depuis dossier red-agent/
 python -m venv venv
-venv\Scripts\activate
+venv\Scripts\activate # MAC : source venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-# éditer .env : mettre votre clé (Open Router par exemple)
+# éditer .env : mettre votre clé (Open Router, modèle Ling 3.0 Flash Sante par exemple)
 ```
-## Test sans clé API (validation de la mécanique)
+
+### Test sans clé API : validation de la mécanique (facultatif)
 
 ```bash
+# Terminal ouvert depuis dossier red-agent/
 python test_agent_mock.py
 ```
 
 Ce script rejoue un scénario scripté (sans appeler de vraie API LLM) pour
 vérifier que les outils, la boucle et le logging fonctionnent.
 
-## Lancement réel
-
-Editer .env : mettre sa clé (Open Router par exemple)
+## Lancement réel en local
 
 ```bash
+# Terminal ouvert depuis dossier red-agent/
 python agent.py
 ```
 

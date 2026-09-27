@@ -2,19 +2,23 @@
 
 Un agent de détection qui surveille en continu les journaux de MiniHub, repère les comportements suspects, les fait analyser par un LLM, puis déclenche une réponse. 
 
-## Installation
+## Lancement en local
+
+### Installation
 
 ```bash
+# Terminal ouvert depuis dossier blue-agent/
 python -m venv venv
-venv/Scripts/activate
+venv\Scripts\activate # MAC : source venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-# éditer .env : mettre votre clé (Open Router par exemple)
+# éditer .env : mettre votre clé (Open Router, modèle Ling 3.0 Flash Sante par exemple)
 ```
 
-## Test sans clé API (validation de la mécanique)
+### Test sans clé API : validation de la mécanique (facultatif)
 
 ```bash
+# Terminal ouvert depuis dossier blue-agent/
 python test_blue_agent_mock.py
 ```
 
@@ -22,20 +26,10 @@ Génère un scénario d'attaque simulé (bruteforce, accès non authentifié,
 chaîne upload → admin) et vérifie que le pipeline complet détecte bien
 les 5 alertes attendues, sans appeler de vraie API.
 
-## Lancement réel — mode CLI
+### Lancement réel en local
 
 ```bash
-python blue_agent.py
-```
-
-Tourne en continu (poll toutes les `BLUE_POLL_INTERVAL` secondes),
-affiche chaque alerte en console au fur et à mesure.
-
-## Lancement réel — mode API
-
-Editer .env : clé API  (Open Router par exemple)
-
-```bash
+# Terminal ouvert depuis dossier blue-agent/
 python api.py
 ```
 
@@ -43,6 +37,8 @@ Expose :
 - `GET http://127.0.0.1:5001/api/alerts` — les 50 dernières alertes
 - `GET http://127.0.0.1:5001/api/status` — statut de l'agent
 
+
+---
 
 ## Blue-agent : Explication
 

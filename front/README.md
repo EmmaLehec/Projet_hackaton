@@ -4,27 +4,29 @@ Une seule page HTML autonome qui affiche en direct :
 - à gauche, les actions du Red Team (`red-agent/api.py`, port 5002)
 - à droite, les alertes du Blue Team (`blue-agent/api.py`, port 5001)
 
-## Lancement
+## Lancement en local
 
-Il te faut **3 terminaux** en parallèle (plus besoin de lancer
-`agent.py` séparément — l'API s'en charge à la demande) :
+Ouvrir au préalable l'application Docker Desktop
 
 ```bash
-# Terminal 1 — la cible
-cd target-env && docker compose up --build
-
-# Terminal 2 — l'API du Red Team (expose ses décisions + un déclenchement à la demande)
-cd red-agent && python3 api.py
-
-# Terminal 3 — l'API du Blue Team (détection continue + alertes)
-cd blue-agent && python3 api.py
+# Terminal ouvert depuis dossier front/
+python -m http.server 8000
 ```
 
-Puis ouvre `http://127.0.0.1:8000/` dans ton navigateur. Le bouton **"Lancer
-une exploration"** au-dessus de la colonne Red Team déclenche une
-nouvelle campagne d'exploration à la demande (via `POST /api/run`) — pas
-de boucle automatique, pour ne pas cramer ton budget API à chaque
-rafraîchissement de la page.
+Ouvrir `http://127.0.0.1:8000/` dans le navigateur. 
+
+Cliquer en haut à droite sur Paramètres de connexion et remplacer les URLs des API par : 
+- URL locale Red agent : http://127.0.0.1:5002/
+- URL locale Blue agent : http://127.0.0.1:5001/
+
+Vérifier/attendre que les pastilles de Red et Blue team soient vertes.
+
+Dans la colonne de gauche, lancer une exploration à la demande pour lancer le Red agent (via `POST /api/run`) et suivre ses décisions exposées.
+Il n'y a pas de boucle automatique, pour ne pas vider le budget API à chaque rafraîchissement de la page.
+
+Regarder la colonne de droite pour voir les alertes affichées en direct au fur et à mesure que le Red agent exploite l'environnement.
+
+
 ---
 
 ## Front : Explication

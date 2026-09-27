@@ -1,13 +1,30 @@
 # Simulation attaque OpenAI/HuggingFace
 
-## Scénario de démo recommandé
+# Scénario de démo
 
-1. Lancer l'environnement cible factice (voir README dans target-env).
-2. Lancer l'agent Blue Team (voir README dans blue-agent).
-3. Lancer l'agent Red Team (voir README dans red-agent).
-4. Regarder les terminals afficher les alertes en direct au fur et à
-   mesure que le Red Team explore/exploite l'environnement.
+## Accéder à la version déployer (Render) (RECOMMENDE)
 
+1. Réveiller l'environnement cible factice : https://projet-hackaton.onrender.com/healthz -> vérifier que statut est ok
+    - on peut consulter l'environnement à : https://projet-hackaton.onrender.com/
+2. Réveiller le frontend : https://projet-hackaton-front.onrender.com/ 
+3. Cliquer en haut à droite sur Paramètres de connexion et vérifier les URLs des API -> vérifier/attendre que les pastilles de Red et Blue team soient vertes (sinon les réveiller manuellement en tapant leur URL dans la navigateur) :
+    - URL Red agent : https://projet-hackaton-red-agent.onrender.com/
+    - URL Blue agent : https://projet-hackaton-blue-agent.onrender.com/
+4. Sur le frontend, lancer une exploration à la demande dans la colonne de gauche pour lancer le Red agent et suivre ses décisions exposées.
+5. Regarder la colonne de droite pour voir les alertes affichées en direct au fur et à mesure que le Red agent exploite l'environnement.
+
+
+## Lancer en local
+
+1. Lancer l'environnement cible factice (voir README dans target-env/).
+2. Lancer l'agent Blue Team (voir README dans blue-agent/).
+3. Lancer l'agent Red Team (voir README dans red-agent/).
+4. Lancer le frontend (voir README dans front/).
+5. Regarder sur le front les deux colonnes afficher les alertes en direct au fur et à
+   mesure que le Red Team exploite l'environnement.
+
+
+---
 
 #  Reconstitution de l'incident Hugging Face/ OpenAI
 

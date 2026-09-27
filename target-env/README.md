@@ -1,10 +1,11 @@
 # MiniHub — Environnement cible factice (bac à sable Red/Blue Team)
 
-> Application volontairement vulnérable, inspirée de Hugging Face, utilisé comme bac à sable et non exposé sur internet.
+> Application volontairement vulnérable, inspirée de Hugging Face, utilisée comme bac à sable et non exposé sur internet.
 
-## Démarrage rapide
+## Lancement en local
 
 ```bash
+# Terminal ouvert depuis dossier target-env/
 docker compose up --build
 ```
 
@@ -16,6 +17,8 @@ Comptes de démo :
 - `admin` / `password` (rôle admin)
 - `alice` / `alice2024` (rôle user)
 
+
+---
 
 ## Sécurité de la démo
 
